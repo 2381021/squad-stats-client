@@ -11,7 +11,7 @@
     let activePlayerIndices = new Set(); 
 
     onMount(async () => {
-        const res = await fetch(`https://squad-stats-server.vercel.app//api/games/${gameId}`);
+        const res = await fetch(`https://squad-stats-server.vercel.app/api/games/${gameId}`);
         if (res.ok) {
             game = await res.json();
             game.players.forEach(p => {
@@ -66,7 +66,7 @@
     }
 
     async function saveGame() {
-        await fetch(`https://squad-stats-server.vercel.app//api/games/${gameId}`, {
+        await fetch(`https://squad-stats-server.vercel.app/api/games/${gameId}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(game)
