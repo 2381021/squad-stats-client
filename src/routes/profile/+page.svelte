@@ -15,7 +15,7 @@
         loading = true;
         stats = null;
         try {
-            const res = await fetch(`http://localhost:3000/api/stats/${$selectedTeam._id}/player/${name}`);
+            const res = await fetch(`https://squad-stats-server.vercel.app//api/stats/${$selectedTeam._id}/player/${name}`);
             if (res.ok) stats = await res.json();
         } catch (error) { console.error(error); } 
         finally { loading = false; }

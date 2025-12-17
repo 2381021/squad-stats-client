@@ -18,13 +18,13 @@
 
     async function loadHistory() {
         if (!$selectedTeam) return;
-        const res = await fetch(`http://localhost:3000/api/games/team/${$selectedTeam._id}`);
+        const res = await fetch(`https://squad-stats-server.vercel.app//api/games/team/${$selectedTeam._id}`);
         pastGames = await res.json();
     }
 
     async function addPlayer() {
         if (!newPlayerName) return;
-        const res = await fetch(`http://localhost:3000/api/teams/${$selectedTeam._id}/players`, {
+        const res = await fetch(`https://squad-stats-server.vercel.app//api/teams/${$selectedTeam._id}/players`, {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({ name: newPlayerName, number: newPlayerNumber })
@@ -35,7 +35,7 @@
 
     async function deletePlayer(id) {
         if(confirm("Remove player?")) {
-            const res = await fetch(`http://localhost:3000/api/teams/${$selectedTeam._id}/players/${id}`, { method: 'DELETE' });
+            const res = await fetch(`https://squad-stats-server.vercel.app//api/teams/${$selectedTeam._id}/players/${id}`, { method: 'DELETE' });
             selectedTeam.set(await res.json());
         }
     }
@@ -44,14 +44,14 @@
     
     async function deleteGame(gameId) {
         if(confirm("Delete game record?")) {
-            await fetch(`http://localhost:3000/api/games/${gameId}`, { method: 'DELETE' });
+            await fetch(`https://squad-stats-server.vercel.app//api/games/${gameId}`, { method: 'DELETE' });
             loadHistory();
         }
     }
 
     async function deleteTeam() {
         if(confirm(`Delete ${$selectedTeam.name}?`)) {
-            await fetch(`http://localhost:3000/api/teams/${$selectedTeam._id}`, { method: 'DELETE' });
+            await fetch(`https://squad-stats-server.vercel.app//api/teams/${$selectedTeam._id}`, { method: 'DELETE' });
             selectedTeam.set(null);
             goto('/');
         }

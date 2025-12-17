@@ -32,7 +32,7 @@
         isLoading = true;
 
         try {
-            const res = await fetch('http://localhost:3000/api/ai/analyze', {
+            const res = await fetch('https://squad-stats-server.vercel.app//api/ai/analyze', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ 

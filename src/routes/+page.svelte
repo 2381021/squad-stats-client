@@ -19,14 +19,14 @@
     let ignoredTeamId = null; 
 
     onMount(async () => {
-        const res = await fetch('http://localhost:3000/api/teams');
+        const res = await fetch('https://squad-stats-server.vercel.app//api/teams');
         teams = await res.json();
         loaded = true;
     });
 
     async function createTeam() {
         if (!newTeamName) return;
-        const res = await fetch('http://localhost:3000/api/teams', {
+        const res = await fetch('https://squad-stats-server.vercel.app//api/teams', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({ name: newTeamName })
