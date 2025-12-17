@@ -11,11 +11,15 @@
     let activePlayerIndices = new Set(); 
 
     onMount(async () => {
+        // Fetch existing game data
         const res = await fetch(`https://squad-stats-server.vercel.app/api/games/${gameId}`);
         if (res.ok) {
             game = await res.json();
+            // Ensure secondsPlayed exists for the timer
             game.players.forEach(p => {
                 if (!p.secondsPlayed) p.secondsPlayed = p.minutes * 60; 
+                // Ensure blocks exist (legacy data fix)
+                if (p.blocks === undefined) p.blocks = 0;
             });
         }
     });
@@ -35,7 +39,7 @@
                     game.players[index].secondsPlayed++;
                     game.players[index].minutes = parseFloat((game.players[index].secondsPlayed / 60).toFixed(1));
                 });
-                game = game;
+                game = game; // Trigger update
             }, 1000);
         }
     }
@@ -58,10 +62,13 @@
 
     function updateStat(playerIndex, statType, value) {
         if (!activePlayerIndices.has(playerIndex)) return;
+        
         const newValue = game.players[playerIndex][statType] + value;
+        
+        // Prevent negative stats
         if (newValue >= 0) {
             game.players[playerIndex][statType] = newValue;
-            game = game;
+            game = game; // Trigger Svelte reactivity
         }
     }
 
@@ -115,6 +122,7 @@
                             <label>PTS</label>
                             <div class="val">{player.points}</div>
                             <div class="btns">
+                                <button class="btn-minus" on:click={() => updateStat(index, 'points', -1)}>-1</button>
                                 <button on:click={() => updateStat(index, 'points', 1)}>+1</button>
                                 <button on:click={() => updateStat(index, 'points', 2)}>+2</button>
                                 <button on:click={() => updateStat(index, 'points', 3)}>+3</button>
@@ -124,15 +132,31 @@
                         <div class="mini-stats">
                             <div class="mini-row">
                                 <span>REB: {player.rebounds}</span>
-                                <button on:click={() => updateStat(index, 'rebounds', 1)}>+</button>
+                                <div class="mini-btns">
+                                    <button class="btn-minus" on:click={() => updateStat(index, 'rebounds', -1)}>-</button>
+                                    <button on:click={() => updateStat(index, 'rebounds', 1)}>+</button>
+                                </div>
                             </div>
                             <div class="mini-row">
                                 <span>AST: {player.assists}</span>
-                                <button on:click={() => updateStat(index, 'assists', 1)}>+</button>
+                                <div class="mini-btns">
+                                    <button class="btn-minus" on:click={() => updateStat(index, 'assists', -1)}>-</button>
+                                    <button on:click={() => updateStat(index, 'assists', 1)}>+</button>
+                                </div>
                             </div>
                             <div class="mini-row">
                                 <span>STL: {player.steals}</span>
-                                <button on:click={() => updateStat(index, 'steals', 1)}>+</button>
+                                <div class="mini-btns">
+                                    <button class="btn-minus" on:click={() => updateStat(index, 'steals', -1)}>-</button>
+                                    <button on:click={() => updateStat(index, 'steals', 1)}>+</button>
+                                </div>
+                            </div>
+                            <div class="mini-row">
+                                <span>BLK: {player.blocks || 0}</span>
+                                <div class="mini-btns">
+                                    <button class="btn-minus" on:click={() => updateStat(index, 'blocks', -1)}>-</button>
+                                    <button on:click={() => updateStat(index, 'blocks', 1)}>+</button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -160,9 +184,9 @@
     }
     .clock-display.active .digital-time { color: #00ff66; text-shadow: 0 0 15px #00ff66; }
     
-    .clock-control { width: 100%; font-size: 1rem; padding: 5px; background: #333; }
+    .clock-control { width: 100%; font-size: 1rem; padding: 5px; background: #333; color: white; border: none; cursor: pointer; }
 
-    .save-btn { background: #007bff; font-size: 1rem; padding: 10px 20px; border-radius: 5px; }
+    .save-btn { background: #007bff; color: white; font-size: 1rem; padding: 10px 20px; border-radius: 5px; border: none; cursor: pointer; }
 
     /* PLAYER CARDS */
     .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; }
@@ -185,7 +209,7 @@
 
     .card-top { display: flex; align-items: center; gap: 15px; margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 15px; }
     .jersey-num { font-size: 2rem; font-weight: bold; font-family: 'Oswald'; color: #444; }
-    .name-box h3 { margin: 0; font-size: 1.4rem; }
+    .name-box h3 { margin: 0; font-size: 1.4rem; color: white; }
     .minutes { font-family: monospace; color: #888; }
 
     /* Custom Toggle Switch */
@@ -201,13 +225,44 @@
     /* STATS CONTROLS */
     .stat-col { text-align: center; margin-bottom: 15px; }
     .stat-col label { color: var(--brand-red); font-weight: bold; letter-spacing: 1px; }
-    .stat-col .val { font-size: 2.5rem; font-family: 'Oswald'; font-weight: bold; }
+    .stat-col .val { font-size: 2.5rem; font-family: 'Oswald'; font-weight: bold; color: white; }
     
-    .btns { display: flex; justify-content: center; gap: 5px; }
-    .btns button { background: #333; width: 40px; height: 40px; border-radius: 50%; padding: 0; font-size: 1rem; }
-    .btns button:hover { background: white; color: black; transform: scale(1.1); }
+    .btns { display: flex; justify-content: center; gap: 5px; flex-wrap: wrap; }
+    .btns button { background: #333; color: white; min-width: 40px; height: 40px; border-radius: 5px; padding: 0 10px; font-size: 1rem; border: none; cursor: pointer; }
+    .btns button:hover { background: white; color: black; transform: scale(1.05); }
 
-    .mini-stats { display: flex; justify-content: space-between; }
-    .mini-row { background: #222; padding: 5px 10px; border-radius: 5px; display: flex; align-items: center; gap: 10px; font-size: 0.9rem; }
-    .mini-row button { padding: 2px 8px; font-size: 0.8rem; background: #444; }
+    /* UPDATED MINI STATS LAYOUT */
+    .mini-stats { 
+        display: grid; 
+        grid-template-columns: 1fr 1fr; /* 2x2 Grid for neatness */
+        gap: 10px; 
+    }
+    
+    .mini-row { 
+        background: #222; 
+        padding: 8px; 
+        border-radius: 5px; 
+        display: flex; 
+        justify-content: space-between; 
+        align-items: center; 
+        font-size: 0.85rem; 
+        color: #ddd;
+    }
+
+    .mini-btns { display: flex; gap: 5px; }
+    
+    .mini-btns button { 
+        padding: 2px 8px; 
+        font-size: 0.9rem; 
+        background: #444; 
+        color: white; 
+        border: none; 
+        border-radius: 3px; 
+        cursor: pointer; 
+    }
+    .mini-btns button:hover { background: white; color: black; }
+
+    /* RED MINUS BUTTONS */
+    .btn-minus { background-color: #d32f2f !important; font-weight: bold; }
+    .btn-minus:hover { background-color: #ff6659 !important; color: white !important; }
 </style>
