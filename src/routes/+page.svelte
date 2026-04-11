@@ -1,6 +1,4 @@
-
 <script>
-
     import { onMount } from 'svelte';
     import { selectedTeam } from '$lib/stores/teamStore';
     import { goto } from '$app/navigation';
@@ -19,6 +17,11 @@
     let ignoredTeamId = null; 
 
     onMount(async () => {
+        // --- ADDED: Check if they've seen the intro ---
+        if (localStorage.getItem('hasSeenIntro') === 'true') {
+            showWelcome = false;
+        }
+
         const res = await fetch('https://squad-stats-server.vercel.app/api/teams');
         teams = await res.json();
         loaded = true;
@@ -39,6 +42,8 @@
     // --- ACTIONS ---
 
     function enterApp() {
+        // --- ADDED: Save the ticket so it skips next time ---
+        localStorage.setItem('hasSeenIntro', 'true');
         showWelcome = false;
     }
 
